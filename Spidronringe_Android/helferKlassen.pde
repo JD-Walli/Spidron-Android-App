@@ -58,7 +58,7 @@ boolean mouseAndPosWereInside(float x1, float y1, float x2, float y2, String rec
     break;
   }
   if (pmouseX> lowX && pmouseX<highX && pmouseY>lowY && pmouseY< highY && positionX>lowX && positionX<highX && positionY>lowY && positionY<highY) {//
-  return true;
+    return true;
   }
   return false;
 }
@@ -135,4 +135,16 @@ void drawTransition(float startX, float startY, float transitionLength, float tr
     }
     break;
   }
+}
+
+boolean txtExist(String name) {
+  boolean result = true;
+  try {
+    String [] lines=loadStrings(name);
+    println(lines[0]);
+  }
+  catch(Exception e) {
+    result=false;
+  }
+  return result;
 }
