@@ -14,26 +14,31 @@ Color red= new Color(175, 9, 4);
 Color blue = new Color(0, 115, 200);
 float standard;
 boolean freeze=false;
+int touchStartedX;
+int erklaerungstextpos;
+int touchStartedY;
+int erklaerungstextlaenge;
 float buttonStand;
 PVector state0ScrollVec, mymouse=new PVector();
 int textAnfangState0;
-int myMouseY=0;
-int myPMouseY=0;
 int stateScrollBack;
 boolean notmove;
 // in der android versio  nicht
-//PVector[] touches= new PVector[]{};
+//PVector[] touches= new PVector[1];
 PImage infoImg;
+HashMap <String, ImageField> images=new HashMap <String, ImageField>();
 
 void setup() {
 
   //// in der android versio  nicht 
-  //size(displayWidth,, 800);
+  //size(displayWidth, displayHeight);  //2048 x 1536
   middle=new PVector(width/2, height/2);
   r=height/4;
-  standard= height/15;
+  standard= height/15; //
   buttonStand=standard*1.5;
   textAnfangState0= height/10;
+  erklaerungstextpos=width/8;
+  erklaerungstextlaenge = int(height*1.6);
   orientation(LANDSCAPE);
   colors.add(new Color(0, 115, 200));  //blau
   colors.add(new Color(100, 0, 170)); //lila
@@ -47,6 +52,13 @@ void setup() {
   //colors.add(new Color(156, 202, 206)); //türkis
   currVal = colors.get((int)random(0, colors.size()));
   infoImg=loadImage("info.png");
+  images.put("info", new ImageField(loadImage("info.png"), standard/2, height-buttonStand*2.5-standard/2, buttonStand*2.2, buttonStand*2.2, CORNER, "CORNER"));
+  images.put("yes", new ImageField(loadImage("yes.png"), width-buttonStand*2.5-standard/2, height-buttonStand*2.5-standard/2, buttonStand*2.5, buttonStand*2.5, CORNER, "CORNER"));
+  images.put("freezegreen", new ImageField(loadImage("freezegreen.png"), standard/2, standard/2, buttonStand*2.5, buttonStand*2.5, CORNER, "CORNER"));
+  images.put("freezeblue", new ImageField(loadImage("freezeblue.png"), standard/2, standard/2, buttonStand*2.5, buttonStand*2.5, CORNER, "CORNER"));  
+  //minus und plus positionen anpassen
+  images.put("minus", new ImageField(loadImage("minus2.png"), width-buttonStand*2.6*2, buttonStand*1.25+standard/2, buttonStand*2, buttonStand*2, CENTER, "CENTER"));
+  images.put("plus", new ImageField(loadImage("plus.png"), width-buttonStand*0.75*2, buttonStand*1.25+standard/2, buttonStand*2, buttonStand*2, CENTER, "CENTER"));
 }
 
 
@@ -63,43 +75,27 @@ void draw() {
     startInstructions();
     if (notmove) {
       if (textAnfangState0>=height/10) {
-        textAnfangState0-=6;
-      } else if (textAnfangState0+height*2 < height-height/10-height) {
-        textAnfangState0+=6;
+        textAnfangState0-=20;
+      } else if (textAnfangState0+erklaerungstextlaenge < height-height/10) {
+        textAnfangState0+=20 ;
       }
-    }
-    fill(255);
-    strokeWeight(3);
-    rectMode(CENTER);
-    rect(width-buttonStand, height-buttonStand, buttonStand*1.5, buttonStand*0.75);
-    rectMode(CORNER);
-    strokeWeight(1);
-    textAlign(CENTER, CENTER);
-    fill(0);
-    textSize(standard*0.75);
-    text("OK", width-buttonStand, height-buttonStand*1.1);
-    textAlign(CORNER);
-    if (points.size()==1&&mouseIsInsideAdv(width-buttonStand*1.75, height-buttonStand*1.25, width-buttonStand*0.25, height-buttonStand*0.25, points.get(0))) {
-      state=1;
     }
     //
   } else {
-    fill(0);
-    textSize(standard);
-    textAlign(CORNER);
-    textSize(standard*0.75);
-    text("freeze", buttonStand+standard/3, buttonStand*0.75);
+
     filter();
-    fill(255);
-    rect(0, 0, buttonStand, buttonStand);
-    if (freeze) {
-      fill(red.rColor, red.gColor, red.bColor, 200);
-    } else {
-      fill(green.rColor, green.gColor, green.bColor, 200);
+    if (freeze) {  
+      images.get("freezeblue").show();
+    } else {  
+      images.get("freezegreen").show();
+      if (points.size()<2) {
+        fill(0);
+        textSize(standard);
+        textAlign(CORNER);
+        textSize(standard*0.75*2);
+        text("freeze", images.get("freezegreen").xPos+images.get("freezegreen").pictureWidth+standard/2, images.get("freezegreen").yPos+images.get("freezegreen").pictureHeight/2*1.4);
+      }
     }
-    strokeWeight(5);
-    rect(0, 0, buttonStand, buttonStand);
-    strokeWeight(1);
   }
   aVectorList.clear();
   bVectorList.clear();
@@ -108,9 +104,19 @@ void draw() {
 }
 
 void startInstructions() {
-  textSize(standard*0.75);
-  String text="Um einen Spidronarm zu bilden, legen Sie zwei Finger auf das Display. \nWenn Sie Ihre Finger auf das Display legen, entsteht, je nach Anzahl der Finger, ein Spidronring im n-Eck, wobei Ihre Finger die Eckpunkte des Spidronrings darstellen. \nWenn Sie drei Finger auf das Display legen,erscheint durch spiegeln der Eckpunkte am Mittelpukt ein Spidronring im Hexagon. \nUm einen \"schönen\" Spidronring entstehen zu lassen, muss man versuchen, die Finger so zu platzieren, dass der resultierende Spidronring gleichseitig ist. \nWenn man sich das Ergebnis nun dauerhaft ansehen möchte, kann man auf den \"freeze\" Button (links oben) klicken. Widerholtes klicken löscht das Ergebnis. \nDamit ein errechnen eines Spidronrings überhaupt möglich ist, muss man seine Finger konvex (nach außen gewölbt) um deren Mittelpunkt verteilen. \n(Profi: Die Anzahl der Innenverbindungen kann oben rechts eingestellt werden. \nBei 0 erscheint also nur das n-Eck, bei 1 die erste Ebene, \nbei zwei die ersten beiden Ebenen, etc.)";
-  text(text, width/8, textAnfangState0, width/8*6, height*2);
+  background(255);
+  fill(0);
+  textSize(standard*0.75); //76,8
+  String text="Um einen Spidronarm zu bilden, legen Sie zwei Finger auf das Display. \nWenn Sie mehr als zwei Finger auf das Display legen, entsteht, je nach Anzahl der Finger, ein Spidronring im n-Eck, wobei Ihre Finger die Eckpunkte des Spidronrings darstellen. \nWenn Sie drei Finger auf das Display legen, erscheint durch Spiegeln der Eckpunkte am Mittelpukt ein Spidronring im Hexagon. \nUm einen \"schoenen\" Spidronring entstehen zu lassen, muss man versuchen, die Finger so zu platzieren, dass der resultierende Spidronring gleichseitig ist. \nWenn man sich das Ergebnis nun dauerhaft ansehen moechte, kann man auf den \"freeze\" Button (links oben) klicken. Wiederholtes klicken loescht das Ergebnis. \nDamit ein Errechnen eines Spidronrings ueberhaupt moeglich ist, muss man seine Finger konvex (nach aussen gewoelbt) um deren Mittelpunkt verteilen. \n(Profi: Die Anzahl der Innenverbindungen kann oben rechts eingestellt werden. Bei 0 erscheint also nur das n-Eck, bei 1 die erste Ebene, bei zwei die ersten beiden Ebenen, etc.)";
+  text(text, erklaerungstextpos, textAnfangState0, erklaerungstextpos*6, erklaerungstextlaenge); // höhe: 3072
+  fill(255);
+  rectMode(CORNER);
+  noStroke();
+  drawTransition(0, height-height/10, height/10, width, 90, 5, "down");
+  drawTransition(0, height/10, height/10, width, 90, 5, "up");
+  images.get("yes").show();
+
+  stroke(1);
 }
 
 //wähle Aktion
@@ -119,26 +125,28 @@ void filter() {
   case 0:
     currVal = colors.get((int)random(0, colors.size()));
     fill(0);
-    textSize(standard);
+    textSize(buttonStand*2);
     textAlign(CENTER, CENTER);
-    text("-", width-standard*2, standard);
-    text("+", width-standard, standard);
-    text(maxDrawNum, width-standard*3.5, standard);
-    textSize(standard*1.5);
+    images.get("plus").show();
+    images.get("minus").show();
+    text(maxDrawNum, (images.get("plus").xPos-images.get("plus").pictureWidth*0.9), images.get("minus").yPos*0.94);
+    textSize(standard*1.6);
     text("Bitte mindestens 2 Finger \nauf das Display legen!", displayWidth/2, displayHeight/2);
-    image(infoImg, width-buttonStand*1.5, height-buttonStand*1.5, buttonStand*1.5, buttonStand*1.5);
+    fill(255);
+    images.get("info").show();
     break;
 
   case 1:
     fill(0);
-    textSize(standard);
+    textSize(buttonStand*2);
     textAlign(CENTER, CENTER);
-    text("-", width-standard*2, standard);
-    text("+", width-standard, standard);
-    text(maxDrawNum, width-standard*3.5, standard);
-    textSize(standard*1.5);
+    images.get("plus").show();
+    images.get("minus").show();
+    text(maxDrawNum, (images.get("plus").xPos-images.get("plus").pictureWidth*0.9), images.get("minus").yPos*0.94);
+    textSize(standard*1.6);
     text("Bitte mindestens 2 Finger \nauf das Display legen!", displayWidth/2, displayHeight/2);
-    image(infoImg, width-buttonStand*1.5, height-buttonStand*1.5, buttonStand*1.5, buttonStand*1.5);
+    fill(255);
+    images.get("info").show();
     break;
 
   case 2:   
@@ -175,48 +183,41 @@ void filter() {
 }
 
 void touchStarted() {
-  if (state==1 && points.size()==1) {
-    if (mouseIsInsideAdv(width-standard*1.5, buttonStand, width, 0, new PVector(touches[0].x, touches[0].y))&&!freeze) {
-      maxDrawNum++;
-      println(maxDrawNum);
-    } else if (mouseIsInsideAdv(width-standard*3, buttonStand, width-standard, 0, new PVector(touches[0].x, touches[0].y))&&!freeze) {
-      maxDrawNum--;
-      if (maxDrawNum<0) {
-        maxDrawNum=0;
-      }
-      println(maxDrawNum);
-    } else if (mouseIsInsideAdv( width-buttonStand*1.5, height-buttonStand*1.5, width, height, new PVector(touches[0].x, touches[0].y))) {
-      state=0;
-    }
-  } else if (points.size()==1) {
-    myPMouseY = int(touches[0].y);
+  touchStartedX=mouseX;
+  touchStartedY=mouseY;
+  if (state==0 &&points.size()==1) {
     notmove=false;
   }
 }
 
 void touchEnded() {
-  //if (textAnfangState0 > height/10) {
-  //  textAnfangState0=int(height/10);
-  //} else if (textAnfangState0+1280 < height-height/10) {
-  //  textAnfangState0=-1280+height-int(height/10);
-  //}
+  if (state==1 ) {
+    if (images.get("info").mouseAndPosWereInsideImageField()) {
+      state=0;
+    } else if (images.get("plus").mouseAndPosWereInsideImageField()) {
+      maxDrawNum++; 
+      if (maxDrawNum>9) maxDrawNum=9;
+    } else if (images.get("minus").mouseAndPosWereInsideImageField()) {
+      maxDrawNum--;
+      if (maxDrawNum<0) maxDrawNum=0;
+    }
+  } else {
+    if (images.get("yes").mouseAndPosWereInsideImageField()) {
+      state=1;
+    }
+  }
   notmove=true;
 }
 
 void touchMoved() {
   notmove=false;
-  if (touches.length==1&&state==0)
-    myMouseY = int(touches[0].y); 
-  textAnfangState0+=mouseY-pmouseY;
-  println(myMouseY-myPMouseY+" diff");
-  println(myMouseY+" y");
-  println(myPMouseY+" yAlt");
-  myPMouseY = int(touches[0].y);
-
+  if (touches.length==1&&state==0) {
+    textAnfangState0+=int((mouseY-pmouseY)/2);
+  }
   if (textAnfangState0 > buttonStand*2) {
     textAnfangState0=int(buttonStand*2);
-  } else if (textAnfangState0 < -height) {
-    textAnfangState0=int(buttonStand*0.3);
+  } else if (textAnfangState0 +erklaerungstextlaenge < height-buttonStand*2) {
+    textAnfangState0=int(height-buttonStand*2-erklaerungstextlaenge);
   }
 }
 
@@ -241,18 +242,14 @@ void polygon() {
 //aktualisiere points
 void refresh(boolean save) {
   background(255, 255, 255);
+  ImageField fregre = images.get("freezegreen");
   for (int i=0; i<touches.length; i++) {
-    if (!mouseIsInsideAdv(0, 0, buttonStand, buttonStand, new PVector(touches[i].x, touches[i].y))) {
+    if ( !mouseIsInsideAdv(fregre.xPos, fregre.yPos, fregre.xPos+fregre.pictureWidth, fregre.yPos+fregre.pictureHeight, new PVector(touches[i].x, touches[i].y))) {
       points.add(new PVector(touches[i].x, touches[i].y));
-    }
-  }
-  if (save) {
-    for (int i=0; i<touches.length; i++) {
-      if (mouseIsInsideAdv(0, 0, buttonStand, buttonStand, new PVector(touches[i].x, touches[i].y))) {
-        freeze=true;
-        for (PVector e : points) {
-          oldpoints.add(e);
-        }
+    } else if (touches.length>2) {
+      freeze=true;
+      for (PVector e : points) {
+        oldpoints.add(e);
       }
     }
   }
@@ -260,18 +257,19 @@ void refresh(boolean save) {
 
 
 void freezerefresh() {
+  ImageField fregre = images.get("freezeblue");
+  for (int i=0; i<touches.length; i++) {
+    if (mouseIsInsideAdv(fregre.xPos, fregre.yPos, fregre.xPos+fregre.pictureWidth, fregre.yPos+fregre.pictureHeight, new PVector(touches[i].x, touches[i].y))) {
+      freeze=false;
+      oldpoints.clear();
+      refresh(true);
+      return;
+    }
+  }
+
   for (PVector e : oldpoints) {
     points.add(e);
   }
-  //for (int i=0; i<touches.length; i++) {
-  //  if (mouseIsInsideAdv(0, 0, buttonStand, buttonStand, new PVector(touches[i].x, touches[i].y))) {
-  if (mouseIsInside(0, 0, buttonStand, buttonStand)) {
-    freeze=false;
-    oldpoints.clear();
-    refresh(true);
-    return;
-  }
-  //}
 }
 
 
