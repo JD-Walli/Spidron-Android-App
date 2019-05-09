@@ -4,8 +4,7 @@ ArrayList <PVector> aVectorList = new ArrayList <PVector>(), bVectorList = new A
       dVectorList = new ArrayList <PVector>(), cVectorList = new ArrayList <PVector>();
 
 void drawSpidron(PVector a, PVector b) {
-  //while (dist(a.x, a.y, b.x, b.y) > minDist) {
-    for (int i=0;i<maxDrawNum;i++){
+  while (dist(a.x, a.y, b.x, b.y) > minDist) {
     result = new ResPoints(getPoints(a, b).c, getPoints(a, b).d);
     drawMyTriangle(a, b, result.c, result.d);
     aVectorList.add(a);
@@ -40,9 +39,10 @@ ResPoints getPoints(PVector a, PVector b) {
 }
 
 void drawMyTriangle(PVector a, PVector b, PVector c, PVector d) {
-    strokeWeight(2);
   fill(currVal.rColor,currVal.gColor, currVal.bColor);
   triangle(a.x, a.y, b.x, b.y, c.x, c.y);
-  //point(d.x, d.y);
+  point(d.x, d.y);
+  stroke(40);
+  strokeWeight(2);
   line(d.x, d.y, a.x, a.y);
 }
