@@ -3,7 +3,7 @@ import java.util.Comparator;
 PVector middle;
 float r;
 int n=15;
-int state=1;
+int state=0;
 ArrayList <PVector> points = new ArrayList<PVector>();
 ArrayList <Color> colors= new ArrayList<Color>();
 ArrayList <PVector> oldpoints = new ArrayList<PVector>();
@@ -22,13 +22,13 @@ int myPMouseY=0;
 int stateScrollBack;
 boolean notmove;
 // in der android versio  nicht
-PVector[] touches= new PVector[]{};
+//PVector[] touches= new PVector[]{};
 PImage infoImg;
 
 void setup() {
-  //*800/15*0,75*x=1280
+
   //// in der android versio  nicht 
-  size(1280, 800);
+  //size(displayWidth,, 800);
   middle=new PVector(width/2, height/2);
   r=height/4;
   standard= height/15;
@@ -63,9 +63,9 @@ void draw() {
     startInstructions();
     if (notmove) {
       if (textAnfangState0>=height/10) {
-        textAnfangState0-=3;
-      } else if (textAnfangState0+1280 < height-height/10) {
-        textAnfangState0+=3;
+        textAnfangState0-=6;
+      } else if (textAnfangState0+height*2 < height-height/10-height) {
+        textAnfangState0+=6;
       }
     }
     fill(255);
@@ -109,8 +109,8 @@ void draw() {
 
 void startInstructions() {
   textSize(standard*0.75);
-  String text="Um ein Spidronarm zu bilden, legen Sie zwei Finger auf das Display. \nWenn Sie Ihre Finger auf das Display legen, entsteht, je nach Anzahl der Finger, ein Spidronring im n-Eck, wobei Ihre Finger die Eckpunkte des Spidronrings darstellen. \nWenn Sie drei Finger auf das Display legen,erscheint durch spiegeln der Eckpunkte am Mittelpukt ein Spidronring im Hexagon. \nUm einen \"schönen\" Spidronring entstehen zu lassen, muss man versuchen, die Finger so zu platzieren, dass der resultierende Spidronring gleichseitig ist. \nWenn man sich das Ergebnis nun dauerhaft ansehen möchte, kann man auf den \"freeze\" Button (links oben) klicken. Widerholtes klicken löscht das Ergebnis. \nDamit ein errechnen eines Spidronrings überhaupt möglich ist, muss man seine Finger konvex (nach außen gewölbt) um deren Mittelpunkt verteilen. \n[Profi: Die Anzahl der Innenverbindungen kann oben rechts eingestellt werden. Bei 0 erscheint also nur das n-Eck, bei 1 die erste Ebene, bei zwei die ersten beiden Ebenen, etc.]";
-  text(text, width/8, textAnfangState0, width/8*6, 1280);
+  String text="Um einen Spidronarm zu bilden, legen Sie zwei Finger auf das Display. \nWenn Sie Ihre Finger auf das Display legen, entsteht, je nach Anzahl der Finger, ein Spidronring im n-Eck, wobei Ihre Finger die Eckpunkte des Spidronrings darstellen. \nWenn Sie drei Finger auf das Display legen,erscheint durch spiegeln der Eckpunkte am Mittelpukt ein Spidronring im Hexagon. \nUm einen \"schönen\" Spidronring entstehen zu lassen, muss man versuchen, die Finger so zu platzieren, dass der resultierende Spidronring gleichseitig ist. \nWenn man sich das Ergebnis nun dauerhaft ansehen möchte, kann man auf den \"freeze\" Button (links oben) klicken. Widerholtes klicken löscht das Ergebnis. \nDamit ein errechnen eines Spidronrings überhaupt möglich ist, muss man seine Finger konvex (nach außen gewölbt) um deren Mittelpunkt verteilen. \n(Profi: Die Anzahl der Innenverbindungen kann oben rechts eingestellt werden. \nBei 0 erscheint also nur das n-Eck, bei 1 die erste Ebene, \nbei zwei die ersten beiden Ebenen, etc.)";
+  text(text, width/8, textAnfangState0, width/8*6, height*2);
 }
 
 //wähle Aktion
@@ -133,7 +133,7 @@ void filter() {
     fill(0);
     textSize(standard);
     textAlign(CENTER, CENTER);
-    text("_", width-standard*2, standard);
+    text("-", width-standard*2, standard);
     text("+", width-standard, standard);
     text(maxDrawNum, width-standard*3.5, standard);
     textSize(standard*1.5);
@@ -176,16 +176,16 @@ void filter() {
 
 void touchStarted() {
   if (state==1 && points.size()==1) {
-    if (mouseIsInside(width-standard*1.5, buttonStand, width, 0)&&!freeze) {
+    if (mouseIsInsideAdv(width-standard*1.5, buttonStand, width, 0, new PVector(touches[0].x, touches[0].y))&&!freeze) {
       maxDrawNum++;
       println(maxDrawNum);
-    } else if (mouseIsInside(width-standard*3, buttonStand, width-standard, 0)&&!freeze) {
+    } else if (mouseIsInsideAdv(width-standard*3, buttonStand, width-standard, 0, new PVector(touches[0].x, touches[0].y))&&!freeze) {
       maxDrawNum--;
       if (maxDrawNum<0) {
         maxDrawNum=0;
       }
       println(maxDrawNum);
-    } else if (mouseIsInside( width-buttonStand*1.5, height-buttonStand*1.5, width, height)) {
+    } else if (mouseIsInsideAdv( width-buttonStand*1.5, height-buttonStand*1.5, width, height, new PVector(touches[0].x, touches[0].y))) {
       state=0;
     }
   } else if (points.size()==1) {
@@ -195,22 +195,28 @@ void touchStarted() {
 }
 
 void touchEnded() {
-  if (textAnfangState0 > height/10) {
-    textAnfangState0=int(height/10);
-  } else if (textAnfangState0+1280 < height-height/10) {
-    textAnfangState0=-1280+height-int(height/10);
-  }
+  //if (textAnfangState0 > height/10) {
+  //  textAnfangState0=int(height/10);
+  //} else if (textAnfangState0+1280 < height-height/10) {
+  //  textAnfangState0=-1280+height-int(height/10);
+  //}
   notmove=true;
 }
 
 void touchMoved() {
-  myMouseY = int(touches[0].y); 
-  textAnfangState0+=myMouseY-myPMouseY;
+  notmove=false;
+  if (touches.length==1&&state==0)
+    myMouseY = int(touches[0].y); 
+  textAnfangState0+=mouseY-pmouseY;
+  println(myMouseY-myPMouseY+" diff");
+  println(myMouseY+" y");
+  println(myPMouseY+" yAlt");
   myPMouseY = int(touches[0].y);
+
   if (textAnfangState0 > buttonStand*2) {
     textAnfangState0=int(buttonStand*2);
-  } else if (textAnfangState0+1280 < height-buttonStand*2) {
-    textAnfangState0=-1280+height-int(buttonStand*2);
+  } else if (textAnfangState0 < -height) {
+    textAnfangState0=int(buttonStand*0.3);
   }
 }
 
