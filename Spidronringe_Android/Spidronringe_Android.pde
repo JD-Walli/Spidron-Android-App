@@ -18,13 +18,13 @@ float buttonStand;
 PVector state0ScrollVec, mymouse=new PVector();
 int textAnfangState0;
 
-// in der android versio  nicht
-PVector[] touches= new PVector[]{new PVector(10, 300)};
+//// in der android versio  nicht
+//PVector[] touches= new PVector[]{new PVector(10, 300)};
 
 void setup() {
 
-  // in der android versio  nicht
-  size(1280, 800);
+  //// in der android versio  nicht
+  //size(1280, 800);
   middle=new PVector(width/2, height/2);
   r=height/4;
   standard= height/15;
